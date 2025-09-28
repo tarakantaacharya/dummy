@@ -1,0 +1,28 @@
+- hosts: web
+  become: true
+  tasks:
+    - name: Ensure dependencies
+      apt:
+        name: git
+        state: present
+        update_cache: yes
+
+    - name: Clone app repo
+      git:
+        repo: 'https://github.com/tarakantaacharya/dummy'
+        dest: /home/vagrant/devops-lab
+        version: main
+
+    - name: Build Docker image
+      community.docker.docker_image:
+        name: devops-lab
+        build:
+          path: /home/vagrant/devops-lab
+
+    - name: Run container
+      community.docker.docker_container:
+        name: devops-app
+        image: devops-lab:latest
+        state: started
+        ports:
+          - "8080:80"
